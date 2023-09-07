@@ -9,6 +9,7 @@ import {
   SAVE_ALERT_DATA,
   TYPE_SAVE_MIN_ORDER_AMOUNT,
   TYPE_DELIVERY_DUNZO__DETAILS,
+  TYPE_SELECTED_CATEGORY_ID_HOME_CONT,
   TYPE_SLOT_MASTER_DETAILS,
   TYPE_SELECTED_CATEGORY,
   TYPE_TODAY_TOMORROW__DATE,
@@ -210,6 +211,12 @@ export function userOperations(state = initialStateUser, action) {
     case TYPE_SELECTED_CATEGORY: {
       return Object.assign({}, state, {
         selected_category_id: action.value,
+      });
+    }
+
+    case TYPE_SELECTED_CATEGORY_ID_HOME_CONT: {
+      return Object.assign({}, state, {
+        selected_category_id_home_cont: action.value,
       });
     }
 

@@ -156,7 +156,6 @@ export class Restaurant extends React.Component {
   /** NETWORK CONNECTIVITY */
   networkConnectivityStatus = () => {
     if (!this.is_filter) this.foodArray = [];
-
     this.getRestaurantDetails();
     this.getCartDataList();
   };
@@ -164,17 +163,39 @@ export class Restaurant extends React.Component {
 
   componentDidMount = () => {
     this.networkConnectivityStatus();
-    if (this.state.cartData != undefined && this.state.cartData.length == 0) {
+    if (
+      this?.state?.cartData != undefined &&
+      this?.state?.cartData?.length == 0
+    ) {
       localStorage.removeItem("save_storeavailabilityData");
     }
+
+    // let { cartData } = this.state;
+    // this.updateCount([{}], false);
+    // this.saveData(cartData);
+    // this.setState({
+    //   cartData: [{}],
+    //   key: this.state.key + 1,
+    // });
+
+    // debugLog(
+    //   "******************************  this.props.navigation?.state?.params?.selected_restaurantCategory ******************************",
+    //   this.props.navigation?.state?.params?.selected_restaurantCategory
+    // );
+
+    // debugLog(
+    //   "componentDidMount @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@******************************",
+    //   this.props.selected_category_id_home_cont
+    // );
+
     // debugLog(
     //   "****************************** Vijay ****************************** Restaurant  this.props.type_today_tomorrow__date ******************************",
     //   this.props.type_today_tomorrow__date
     // );
-    debugLog(
-      "******************************  this.props.navigation.state.params ******************************",
-      this.props.navigation?.state?.params?.selected_restaurantCategory
-    );
+    // debugLog(
+    //   "******************************  this.props.navigation.state.params ******************************",
+    //   this.props.navigation?.state?.params?.selected_restaurantCategory
+    // );
   };
 
   getCartDataList = () => {
@@ -257,21 +278,15 @@ export class Restaurant extends React.Component {
   storeData = async (data, qty = 1, customQty = "") => {
     var cartArray = [];
     var cartData = {};
-
-    // debugLog("this.state.cartData -----------------------------");
-    // debugLog("this.state.cartData", this.state.cartData);
-
     if (this.state?.cartData && this.state?.cartData.length == 0) {
       localStorage.removeItem("save_storeavailabilityData");
       let { cartData } = this.state;
       this.setState({ cartData: [] });
     }
-
     let storeavailabilityData = localStorage.getItem(
       "save_storeavailabilityData"
     );
-
-    // debugLog("data88888888888888888888888888888", data);
+    debugLog("data88888888888888888888888888888", data);
     // debugLog("data?.availability", data?.availability);
     // debugLog("00000000000000", storeavailabilityData);
 
@@ -391,22 +406,23 @@ export class Restaurant extends React.Component {
         this.storeData(data, qty);
       });
     } else if (Slot_Master_Rest_CategoryCheking != undefined) {
-      // debugLog("7575452452452452452452000000000000000000");
+      debugLog("7575452452452452452452000000000000000000");
+
       getCartList(
         (success) => {
-          console.log(":::::::::::", success);
+          // debugLog(
+          //   "%%%%%%%%%%%%%%%%% success %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+          //   success
+          // );
+          // console.log("::::::::::::::::::::::::::::::::: success ", success);
           if (success != undefined) {
             cartArray = success.items;
             // cartArray =
             //   Slot_Master_Rest_CategoryCheking != undefined
             //     ? success.items
             //     : [];
-            // debugLog(":::::::::::  cartArray.length   ", cartArray.length);
-            // if (cartArray.length - 1 == 0) {
-            //   debugLog("::::::::::: removeItem  ", cartArray.length);
-            //   localStorage.removeItem("save_storeavailabilityData");
-            // }
-            if (cartArray.length > 0) {
+
+            if (cartArray && cartArray?.length > 0) {
               if (success.resId == this.resId) {
                 var repeatArray = cartArray.filter((item) => {
                   return item.menu_id == data.menu_id;
@@ -451,6 +467,14 @@ export class Restaurant extends React.Component {
                   coupon_array: success.coupon_array,
                 };
 
+                // debugLog(
+                //   "%%%%%%%%%%%%%%%%%  cartData.items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+                //   cartData.items
+                // );
+                // debugLog(
+                //   "%%%%%%%%%%%%%%%%% cartData %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+                //   cartData
+                // );
                 this.updateCount(cartData.items, repeatArray.length == 0);
                 this.saveData(cartData);
                 this.setState({
@@ -467,7 +491,7 @@ export class Restaurant extends React.Component {
                   recipeVisible: false,
                 });
               }
-            } else if (cartArray.length == 0) {
+            } else if (cartArray && cartArray.length == 0) {
               //cart empty
 
               data.quantity = customQty !== "" ? customQty : qty;
@@ -588,8 +612,63 @@ export class Restaurant extends React.Component {
     );
   }
 
+  clear_category_ifdiffers = () => {
+    debugLog(
+      "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%clear_category_ifdiffers 1%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+      this?.state?.cartData && this?.state?.cartData[0]?.availability
+    );
+    debugLog(
+      "%%%%%%%%%%%%%%%%%%%%%%%% clear_category_ifdiffers %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+      this.props.selected_category_id_home_cont?.categoryName
+    );
+
+    if (
+      this?.state?.cartData &&
+      this?.state?.cartData[0]?.availability !=
+        this.props.selected_category_id_home_cont?.categoryName
+    ) {
+      let { cartData } = this.state;
+      this.updateCount([{}], false);
+      this.saveData(cartData);
+      this.setState({
+        cartData: [{}],
+        key: this.state.key + 1,
+      });
+    }
+    return false;
+    {
+      /* {this?.props?.selected_category_id_home_cont?.categoryName !==
+              (this?.state?.cartData.length >= 0 &&
+                this?.state?.cartData[0]?.availability)
+                ? this.clear_category_ifdiffers()
+                : null} */
+    }
+    // let { cartData } = this.state;
+    // this.updateCount([{}], false);
+    // this.saveData(cartData);
+    // this.setState({
+    //   cartData: [{}],
+    //   key: this.state.key + 1,
+    // });
+  };
+
+  //   // this.clear_category_ifdiffers();
+
   //#region ITEM DETAILS
   renderItemDetails = () => {
+    // if (
+    //   this.props.selected_category_id_home_cont?.categoryName !=
+    //   (this?.state?.cartData != undefined &&
+    //     this?.state?.cartData.length >= 0 &&
+    //     this?.state?.cartData[0]?.availability)
+    // ) {
+    //   // this.clear_category_ifdiffers();
+    //   debugLog(
+    //     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% renderItemDetails %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+    //     // this?.state?.cartData[0]?.availability
+    //     this?.state?.cartData
+    //   );
+    // }
     return (
       <EDPopupView isModalVisible={this.state.visible}>
         <EDItemDetails
@@ -599,9 +678,10 @@ export class Restaurant extends React.Component {
           onPress={this.onPressAddtoCartItemHandler}
           isOpen={this.isOpen.toLowerCase() === "open" ? true : false}
           cartData={
-            this.state.cartData != undefined && this.state.cartData.length === 0
+            this?.state?.cartData != undefined &&
+            this?.state?.cartData?.length === 0
               ? []
-              : this.state.cartData
+              : this?.state?.cartData
           }
           navigateToCart={this.navigateToCart}
           onRecipeDetails={this.onRecipeDetails}
@@ -633,9 +713,10 @@ export class Restaurant extends React.Component {
           onPress={this.onPressAddtoCartItemHandler}
           isOpen={this.isOpen.toLowerCase() === "open" ? true : false}
           cartData={
-            this.state.cartData != undefined && this.state.cartData.length === 0
+            this?.state?.cartData != undefined &&
+            this?.state?.cartData?.length === 0
               ? []
-              : this.state.cartData
+              : this?.state?.cartData
           }
           navigateToCart={this.navigateToCart}
         />
@@ -789,13 +870,13 @@ export class Restaurant extends React.Component {
   //#region
   /** ON PLUS CLICKED */
   onPlusEventHandler = (value, index) => {
-    console.log("in plus event::::: ", this.state.cartData);
+    // console.log("in plus event::::: ", this?.state?.cartData);
     if (value > 0) {
-      var array = this.state.cartData;
+      var array = this?.state?.cartData;
       this.state.cartData[index].quantity = value;
-      this.updateUI(this.state.cartData);
+      this.updateUI(this?.state?.cartData);
     }
-    console.log("UPADTED ARRAY", this.state.cartData);
+    // console.log("UPADTED ARRAY", this?.state?.cartData);
   };
   //#endregion
 
@@ -803,25 +884,25 @@ export class Restaurant extends React.Component {
   /** ONMINUS CLICKED */
   onMinusEventHandler = (value, index) => {
     // if (value > 0) {
-    //     var array = this.state.cartData
-    //     this.state.cartData.items[index].quantity = value;
-    //     this.updateUI(this.state.cartData);
+    //     var array = this?.state?.cartData
+    //     this?.state?.cartData.items[index].quantity = value;
+    //     this.updateUI(this?.state?.cartData);
     // } else if (value == 0) {
     // }
-    // console.log("UPADTED ARRAY", this.state.cartData)
+    // console.log("UPADTED ARRAY", this?.state?.cartData)
   };
   //#endregion
 
   deleteHandler = (index) => {
-    debugLog("DELETE INDEX :::::", index);
-    var array = this.state.cartData;
+    // debugLog("DELETE INDEX :::::", index);
+    var array = this?.state?.cartData;
     array.splice(index, 1);
     this.updateUI(array);
   };
 
   //#region UPDATE UI
   updateUI(items) {
-    console.log("UPDATED UI CALLED::::: ", items);
+    // console.log("UPDATED UI CALLED::::: ", items);
     let cartData = {
       resId: this.resId,
       content_id: this.content_id,
@@ -842,8 +923,16 @@ export class Restaurant extends React.Component {
 
   /** RENDER ITEMS TO REMOVE MODEL */
   renderRemoveItems = () => {
-    let cartItems = this.state.cartData || {};
-    if (!cartItems.map((e) => e.menu_id).includes(this.itemToRemove.menu_id)) {
+    let cartItems = this?.state?.cartData || [];
+    // debugLog(
+    //   "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% renderRemoveItems cartItems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+    //   cartItems
+    // );
+    if (
+      cartItems != undefined &&
+      cartItems.length > 0 &&
+      !cartItems?.map((e) => e.menu_id).includes(this.itemToRemove.menu_id)
+    ) {
       if (this.state.removeModal) this.onDismissRemove();
     }
     return (
@@ -947,6 +1036,15 @@ export class Restaurant extends React.Component {
 
   // RENDER METHOD
   render() {
+    let { cartData } = this.state;
+    // debugLog(
+    //   "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",
+    //   this?.state?.cartData
+    // );
+    // debugLog(
+    //   "render @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@******************************",
+    //   this.props.selected_category_id_home_cont
+    // );
     return (
       <BaseContainer
         title={strings("restaurantTitle")}
@@ -995,13 +1093,14 @@ export class Restaurant extends React.Component {
               {this.renderItemDetails()}
               {this.renderTiming()}
               {/* {this.renderRecipeDetails()} */}
-
               {this.renderCategoryOrder()}
-
+              {/* {this?.props?.selected_category_id_home_cont?.categoryName !==
+              (this?.state?.cartData.length >= 0 &&
+                this?.state?.cartData[0]?.availability)
+                ? this.clear_category_ifdiffers()
+                : null} */}
               {this.renderCartChangeModal()}
-
-              {this.state.cartData !== [] ? this.renderRemoveItems() : null}
-
+              {this?.state?.cartData !== [] ? this.renderRemoveItems() : null}
               {this.menuArray !== undefined && this.menuArray.length > 0 ? (
                 <View style={{ flex: 1 }}>
                   <EDMenuListComponent
@@ -1011,9 +1110,9 @@ export class Restaurant extends React.Component {
                     data2={this.sectionData}
                     currency_Symbol={this.restaurantDetails.currency_symbol}
                     cartData={
-                      this.state.cartData.length === 0
+                      this?.state?.cartData?.length === 0
                         ? []
-                        : this.state.cartData
+                        : this?.state?.cartData
                     }
                     isOpen={this.isOpen.toLowerCase() === "open" ? true : false}
                     plusAction={this.onResDetailsPlusEvent}
@@ -1131,6 +1230,10 @@ export class Restaurant extends React.Component {
                   />
                 </View>
               ) : null}
+
+              {/* {this?.state?.cartData !== []
+                ? this.clear_category_ifdiffers()
+                : null} */}
             </View>
           ) : !this.state.isLoading &&
             !this.state.isMenuLoading &&
@@ -1157,7 +1260,7 @@ export class Restaurant extends React.Component {
   //#region
   /** RES DETAILS PLUS EVENT */
   onResDetailsPlusEvent = (itemdata, data) => {
-    debugLog("ADD ON CHECK ::::::", itemdata);
+    // debugLog("ADD ON CHECK ::::::", itemdata);
     this.setState({
       isCategory: true,
     });
@@ -1224,7 +1327,7 @@ export class Restaurant extends React.Component {
     let quantity = 1;
     if (data.is_customize == "0") {
       let count = 0;
-      let same_item_incart = this.state.cartData.filter((item) => {
+      let same_item_incart = this?.state?.cartData.filter((item) => {
         return item.menu_id === data.menu_id;
       });
       if (
@@ -1313,7 +1416,7 @@ export class Restaurant extends React.Component {
           // console.log("[][[][][][][][ 2", success);
           if (success !== undefined) {
             cartArray = success.items;
-            if (cartArray.length > 0) {
+            if (cartArray && cartArray.length > 0) {
               if (success.resId !== this.resId) {
                 this.tempArrayItem = item;
                 this.tempQty = qty;
@@ -1584,10 +1687,10 @@ export class Restaurant extends React.Component {
    * @param { Success Response Object } onSuccess
    */
   onSuccessResMenuData = (onSuccess) => {
-    debugLog(
-      "**************************   onSuccessResMenuData ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ",
-      onSuccess?.menu_item
-    );
+    // debugLog(
+    //   "**************************   onSuccessResMenuData ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ",
+    //   onSuccess?.menu_item
+    // );
 
     let { category_Master } = this.state;
     this.setState({ category_Master: onSuccess?.menu_item });
@@ -1681,10 +1784,10 @@ export class Restaurant extends React.Component {
           availability: this.availType,
           plan_date: this.props.type_today_tomorrow__date,
           category_id:
-            this.props.navigation?.state?.params?.selected_restaurantCategory,
+            this.props.navigation?.state?.params?.selected_restaurantCategory ||
+            this.props?.selected_category_id_home_cont ||
+            0,
         };
-
-        debugLog("objRestaurantData", objRestaurantData);
 
         getRestaurantMenu(
           objRestaurantData,
@@ -1831,6 +1934,8 @@ export default connect(
       slot_Master_details: state.userOperations.slot_Master_details,
       selected_Slot_ID: state.userOperations.selected_Slot_ID,
       selected_category_id: state.userOperations.selected_category_id,
+      selected_category_id_home_cont:
+        state.userOperations.selected_category_id_home_cont,
     };
   },
   (dispatch) => {

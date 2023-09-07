@@ -174,11 +174,19 @@ export function save_slot_Master_details(details) {
   };
 }
 
-
 export const TYPE_SELECTED_CATEGORY = "TYPE_SELECTED_CATEGORY";
 export function save_selected_category(details) {
   return {
     type: TYPE_SELECTED_CATEGORY,
+    value: details,
+  };
+}
+
+export const TYPE_SELECTED_CATEGORY_ID_HOME_CONT =
+  "TYPE_SELECTED_CATEGORY_ID_HOME_CONT";
+export function save_selected_category_home_cont(details) {
+  return {
+    type: TYPE_SELECTED_CATEGORY_ID_HOME_CONT,
     value: details,
   };
 }
