@@ -191,6 +191,15 @@ export function save_selected_category_home_cont(details) {
   };
 }
 
+export const TYPE_RECEIVED_CATEGORY_ID_FROM_HOME_CONT =
+  "TYPE_RECEIVED_CATEGORY_ID_FROM_HOME_CONT";
+export function save_received_category_from_homecont(details) {
+  return {
+    type: TYPE_RECEIVED_CATEGORY_ID_FROM_HOME_CONT,
+    value: details,
+  };
+}
+
 export const TYPE_SELECTED_RES_ID = "TYPE_SELECTED_RES_ID";
 export function save_selected_Res_ID(details) {
   return {

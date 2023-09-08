@@ -60,6 +60,7 @@ import {
   saveResIDInRedux,
   save_slot_Master_details,
   save_selected_category,
+  save_received_category_from_homecont,
 } from "../redux/actions/User";
 import { FlatList } from "react-native";
 import EDRTLView from "../components/EDRTLView";
@@ -170,18 +171,54 @@ export class Restaurant extends React.Component {
       localStorage.removeItem("save_storeavailabilityData");
     }
 
-    // let { cartData } = this.state;
-    // this.updateCount([{}], false);
-    // this.saveData(cartData);
-    // this.setState({
-    //   cartData: [{}],
-    //   key: this.state.key + 1,
-    // });
+    debugLog(
+      "******************************selected_restaurantCategory ******************************",
+      this.props.navigation?.state?.params?.selected_restaurantCategory
+    );
 
-    // debugLog(
-    //   "******************************  this.props.navigation?.state?.params?.selected_restaurantCategory ******************************",
-    //   this.props.navigation?.state?.params?.selected_restaurantCategory
-    // );
+    debugLog(
+      "this.props.received_category_id_from_home_cont",
+      this.props.received_category_id_from_home_cont
+    );
+
+    if (
+      this.props.received_category_id_from_home_cont == "" ||
+      this.props.received_category_id_from_home_cont == undefined
+    ) {
+      this.props.save_received_category_from_homecont(
+        this.props.navigation?.state?.params?.selected_restaurantCategory
+      );
+    } else if (
+      this.props.received_category_id_from_home_cont ==
+      this.props.navigation?.state?.params?.selected_restaurantCategory
+    ) {
+      this.props.save_received_category_from_homecont(
+        this.props.navigation?.state?.params?.selected_restaurantCategory
+      );
+    } else if (
+      this.props.received_category_id_from_home_cont !=
+      this.props.navigation?.state?.params?.selected_restaurantCategory
+    ) {
+      let cartData = {
+        resId: this.resId,
+        content_id: this.content_id,
+        items: [],
+        coupon_name: "",
+        cart_id: 0,
+        resName: this?.restaurantDetails?.name,
+        coupon_array: [],
+      };
+      // let { cartData } = this.state;
+      this.updateCount([], false);
+      this.saveData(cartData);
+      this.setState({
+        cartData: [],
+        key: this.state.key + 1,
+      });
+      this.props.save_received_category_from_homecont(
+        this.props.navigation?.state?.params?.selected_restaurantCategory
+      );
+    }
 
     // debugLog(
     //   "componentDidMount @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@******************************",
@@ -286,7 +323,13 @@ export class Restaurant extends React.Component {
     let storeavailabilityData = localStorage.getItem(
       "save_storeavailabilityData"
     );
-    debugLog("data88888888888888888888888888888", data);
+
+    debugLog(
+      "data88888888888888888888888888888 this.state?.cartData ",
+      this.state?.cartData
+    );
+    debugLog("9999999999999999999999999999999999999", data);
+
     // debugLog("data?.availability", data?.availability);
     // debugLog("00000000000000", storeavailabilityData);
 
@@ -327,9 +370,23 @@ export class Restaurant extends React.Component {
       // );
       // debugLog("getstoredCatemaster", getstoredCatemaster);
 
+      debugLog(
+        "fis.clsslabs.com/FIS/api/auth/getDeliverySlot?outletI ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        this.props?.navigation?.state?.params?.restId
+      );
+      debugLog(
+        "fis.clsslabs.com/FIS/api/auth/getDeliverySlot?outletI ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ",
+        this.props.navigation?.state?.params?.selected_restaurantCategory
+      );
+
       let getDeliveryChargeAPICall = await axios
         .get(
-          `https://fis.clsslabs.com/FIS/api/auth/getDeliverySlot?outletId=${this.props?.navigation?.state?.params?.restId}&menuCategoryId=${get_category_Master[0]?.category_id}`,
+          `https://fis.clsslabs.com/FIS/api/auth/getDeliverySlot?outletId=${
+            this.props?.navigation?.state?.params?.restId
+          }&menuCategoryId=${
+            // get_category_Master && get_category_Master[0]?.category_id
+            this.props.navigation?.state?.params?.selected_restaurantCategory
+          }`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -355,7 +412,8 @@ export class Restaurant extends React.Component {
         .then((data) => {})
         .catch((error) => {
           showValidationAlert(
-            `Delivery Slots Not Available for ${data?.availability} `
+            // `Delivery Slots Not Available for ${data?.availability} `
+            `Delivery Slots Not Available for this category`
           );
           localStorage.setItem(
             "Slot_Master_Rest_Category",
@@ -406,14 +464,13 @@ export class Restaurant extends React.Component {
         this.storeData(data, qty);
       });
     } else if (Slot_Master_Rest_CategoryCheking != undefined) {
-      debugLog("7575452452452452452452000000000000000000");
-
+      // debugLog("7575452452452452452452000000000000000000");
       getCartList(
         (success) => {
-          // debugLog(
-          //   "%%%%%%%%%%%%%%%%% success %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
-          //   success
-          // );
+          debugLog(
+            "%%%%%%%%%%%%%%%%% success %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+            success
+          );
           // console.log("::::::::::::::::::::::::::::::::: success ", success);
           if (success != undefined) {
             cartArray = success.items;
@@ -509,6 +566,12 @@ export class Restaurant extends React.Component {
                 this.props.table_id !== ""
               )
                 cartData.table_id = this.props.table_id;
+
+              debugLog(
+                "%%%%%%%%%%%%%%%%% cartData %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+                cartData
+              );
+
               this.updateCount(cartData.items, true);
               this.saveData(cartData);
               this.setState({
@@ -578,26 +641,27 @@ export class Restaurant extends React.Component {
     var price = 0;
     var array = [];
     var subArray = [];
-    data.map((item, index) => {
-      count = count + item.quantity;
-      price =
-        item.offer_price !== undefined && item.offer_price !== ""
-          ? Number(price) + item.quantity * parseInt(item.offer_price)
-          : Number(price) + item.quantity * Number(item.price);
-      if (
-        item.addons_category_list != undefined &&
-        item.addons_category_list != []
-      ) {
-        array = item.addons_category_list;
-        array.map((data) => {
-          subArray = data.addons_list;
-          subArray.map((innerData) => {
-            price =
-              Number(price) + item.quantity * Number(innerData.add_ons_price);
+    data &&
+      data.map((item, index) => {
+        count = count + item.quantity;
+        price =
+          item.offer_price !== undefined && item.offer_price !== ""
+            ? Number(price) + item.quantity * parseInt(item.offer_price)
+            : Number(price) + item.quantity * Number(item.price);
+        if (
+          item.addons_category_list != undefined &&
+          item.addons_category_list != []
+        ) {
+          array = item.addons_category_list;
+          array.map((data) => {
+            subArray = data.addons_list;
+            subArray.map((innerData) => {
+              price =
+                Number(price) + item.quantity * Number(innerData.add_ons_price);
+            });
           });
-        });
-      }
-    });
+        }
+      });
     this.props.saveCartCount(count);
     this.props.saveCartPrice(price);
   }
@@ -613,43 +677,28 @@ export class Restaurant extends React.Component {
   }
 
   clear_category_ifdiffers = () => {
-    debugLog(
-      "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%clear_category_ifdiffers 1%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
-      this?.state?.cartData && this?.state?.cartData[0]?.availability
-    );
-    debugLog(
-      "%%%%%%%%%%%%%%%%%%%%%%%% clear_category_ifdiffers %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
-      this.props.selected_category_id_home_cont?.categoryName
-    );
-
-    if (
-      this?.state?.cartData &&
-      this?.state?.cartData[0]?.availability !=
-        this.props.selected_category_id_home_cont?.categoryName
-    ) {
-      let { cartData } = this.state;
-      this.updateCount([{}], false);
-      this.saveData(cartData);
-      this.setState({
-        cartData: [{}],
-        key: this.state.key + 1,
-      });
-    }
-    return false;
-    {
-      /* {this?.props?.selected_category_id_home_cont?.categoryName !==
-              (this?.state?.cartData.length >= 0 &&
-                this?.state?.cartData[0]?.availability)
-                ? this.clear_category_ifdiffers()
-                : null} */
-    }
-    // let { cartData } = this.state;
-    // this.updateCount([{}], false);
-    // this.saveData(cartData);
-    // this.setState({
-    //   cartData: [{}],
-    //   key: this.state.key + 1,
-    // });
+    // debugLog(
+    //   "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%clear_category_ifdiffers 1%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+    //   this?.state?.cartData && this?.state?.cartData[0]?.availability
+    // );
+    // debugLog(
+    //   "%%%%%%%%%%%%%%%%%%%%%%%% clear_category_ifdiffers %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+    //   this.props.selected_category_id_home_cont?.categoryName
+    // );
+    // if (
+    //   this?.state?.cartData &&
+    //   this?.state?.cartData[0]?.availability !=
+    //     this.props.selected_category_id_home_cont?.categoryName
+    // ) {
+    //   let { cartData } = this.state;
+    //   this.updateCount([{}], false);
+    //   this.saveData(cartData);
+    //   this.setState({
+    //     cartData: [{}],
+    //     key: this.state.key + 1,
+    //   });
+    // }
+    // return false;
   };
 
   //   // this.clear_category_ifdiffers();
@@ -1936,6 +1985,8 @@ export default connect(
       selected_category_id: state.userOperations.selected_category_id,
       selected_category_id_home_cont:
         state.userOperations.selected_category_id_home_cont,
+      received_category_id_from_home_cont:
+        state.userOperations.received_category_id_from_home_cont,
     };
   },
   (dispatch) => {
@@ -1964,6 +2015,9 @@ export default connect(
       },
       save_selected_category: (table_id) => {
         dispatch(save_selected_category(table_id));
+      },
+      save_received_category_from_homecont: (table_id) => {
+        dispatch(save_received_category_from_homecont(table_id));
       },
     };
   }
