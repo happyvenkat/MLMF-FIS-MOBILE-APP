@@ -257,8 +257,11 @@ class MainContainer extends React.Component {
     this.getCartList();
     this.getAddressList();
     AppState.addEventListener("change", this._handleAppStateChange);
-
     this.dateIntialCall();
+    debugLog(
+      "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",
+      this.props.selected_category_id_home_cont?.category
+    );
   }
 
   dateIntialCall() {
@@ -1275,48 +1278,53 @@ class MainContainer extends React.Component {
           let { restaurantCategoryMAster } = this.state;
           let apiresponseofcatemaster = response?.data?.data;
 
-          let filterstatesMastervalues = apiresponseofcatemaster.map(
-            ({ category, categoryName }) => ({
+          let filterstatesMastervalues =
+            apiresponseofcatemaster &&
+            apiresponseofcatemaster.map(({ category, categoryName }) => ({
               category,
               flag: false,
               categoryName,
-            })
-          );
+            }));
 
           let filterstatesMastervalueszeroth;
 
           debugLog(
-            "8888888888888887777777777777777777777",
+            "77777777777777777777777777777777777777777777777",
             filterstatesMastervalues
           );
 
           debugLog(
-            "888888888888888888888899999999999999999",
-            this.props.selected_category_id_home_cont?.category
+            "8888888888888888888888888888888888888888888888888888888",
+            this?.props?.selected_category_id_home_cont
           );
 
           if (
-            this.props.selected_category_id_home_cont?.category != "" &&
-            this.props.selected_category_id_home_cont?.category != undefined
+            this?.props?.selected_category_id_home_cont?.category == "" &&
+            this?.props?.selected_category_id_home_cont?.category == undefined
           ) {
-            filterstatesMastervalueszeroth = filterstatesMastervalues.map(
-              (item, i) => {
-                if (i == 0) {
+            debugLog(
+              "77777777777777777  filterstatesMastervalues  777777777777777777777777777777",
+              filterstatesMastervalues
+            );
+
+            filterstatesMastervalueszeroth =
+              filterstatesMastervalues &&
+              filterstatesMastervalues.map((item, index) => {
+                if (index == 0) {
                   item.flag = true;
                 } else {
                   item.flag = false;
                 }
                 return item;
-              }
-            );
+              });
           } else {
             debugLog(
-              "888888888888888888888899999999999999999",
+              "9999999999999999999999999999999999999999999999999999999",
               this.props.selected_category_id_home_cont?.category
             );
-
-            filterstatesMastervalueszeroth = filterstatesMastervalues.map(
-              (item, i) => {
+            filterstatesMastervalueszeroth =
+              filterstatesMastervalues &&
+              filterstatesMastervalues.map((item, i) => {
                 if (
                   Number(item?.category) ==
                   this.props.selected_category_id_home_cont?.category
@@ -1326,14 +1334,12 @@ class MainContainer extends React.Component {
                   item.flag = false;
                 }
                 return item;
-              }
-            );
+              });
           }
-          debugLog(
-            "lterstatesMastervalueszeroth[0]",
-            filterstatesMastervalueszeroth
-          );
-
+          // debugLog(
+          //   "lterstatesMastervalueszeroth[0]",
+          //   filterstatesMastervalueszeroth
+          // );
           this.setState(
             {
               restaurantCategoryMAster: filterstatesMastervalueszeroth,
@@ -1424,8 +1430,12 @@ class MainContainer extends React.Component {
   };
 
   callRes_container = async () => {
-    let { modal_Pop_Up, restObjModelvalue, selected_restaurantCategory } =
-      this.state;
+    let {
+      modal_Pop_Up,
+      restObjModelvalue,
+      selected_restaurantCategory,
+      restaurantCategoryMAster,
+    } = this.state;
 
     this.setState({
       modal_Pop_Up: !this.state.modal_Pop_Up,
@@ -1437,9 +1447,24 @@ class MainContainer extends React.Component {
     // );
     // return false;
 
+    let filterflagtrue =
+      restaurantCategoryMAster &&
+      restaurantCategoryMAster.filter((item, i) => {
+        if (item?.flag == true) {
+          return item;
+        }
+      });
+    debugLog("filterflagtrue[0]", filterflagtrue[0]);
+    debugLog(
+      "this.props.selected_category_id_home_cont?.category",
+      this.props.selected_category_id_home_cont?.category
+    );
+    // return false;
+    this.props.save_selected_category_home_cont(filterflagtrue[0]);
     this.props.navigation.navigate("RestaurantContainer", {
-      selected_restaurantCategory:
-        this.props.selected_category_id_home_cont?.category,
+      // selected_restaurantCategory:
+      //   this.props.selected_category_id_home_cont?.category,
+      selected_restaurantCategory: filterflagtrue[0]?.category,
       restId: this.state?.restObjModelvalue?.restuarant_id,
       content_id: this.state?.restObjModelvalue?.content_id,
       currency: this.state?.restObjModelvalue?.currency_symbol,
@@ -1451,7 +1476,17 @@ class MainContainer extends React.Component {
   };
 
   changeflagcategorymenu = async (items) => {
-    let { restaurantCategoryMAster } = this.state;
+    debugLog(
+      "333333333333333333333333333333333333333333333333333333 changeflagcategorymenu",
+      items?.category
+    );
+
+    debugLog(
+      "22222222222222222222222222222222222222222222222222222222222222222222",
+      this?.props?.selected_category_id_home_cont
+    );
+
+    let { restaurantCategoryMAster, selected_restaurantCategory } = this.state;
     let filterstatesMastervalues =
       restaurantCategoryMAster &&
       restaurantCategoryMAster.map((item, i) => {
@@ -1473,12 +1508,35 @@ class MainContainer extends React.Component {
 
     // debugLog("filterflagtrue filterflagtrue ", filterflagtrue[0]);
 
+    if (
+      this?.props?.selected_category_id_home_cont?.category != "" &&
+      this?.props?.selected_category_id_home_cont?.category != undefined
+    ) {
+      debugLog(
+        "22222222222222222222222222222222222222222222222222222222222222222222",
+        this?.props?.selected_category_id_home_cont?.category
+      );
+      debugLog(
+        "333333333333333333333333333333333333333333333333333333",
+        items?.category
+      );
+
+      if (
+        this?.props?.selected_category_id_home_cont?.category != items?.category
+      ) {
+        showValidationAlert(
+          `Are you sure want to proceed  with ${items?.categoryName}?,\nNote:All items from cart will be removed !`
+        );
+      }
+    }
     this.setState(
       {
         restaurantCategoryMAster: filterstatesMastervalues,
+        selected_restaurantCategory: filterflagtrue[0],
+        // selected_restaurantCategory
       },
       () => {
-        this.props.save_selected_category_home_cont(filterflagtrue[0]);
+        // this.props.save_selected_category_home_cont(filterflagtrue[0]);
       }
     );
   };
@@ -2200,9 +2258,9 @@ class MainContainer extends React.Component {
                 restaurantCategoryMAster: filterstatesMastervalueszeroth,
               },
               () => {
-                this.props.save_selected_category_home_cont(
-                  filterstatesMastervalueszeroth[0]
-                );
+                // this.props.save_selected_category_home_cont(
+                //   filterstatesMastervalueszeroth[0]
+                // );
               }
             );
           }
@@ -2333,7 +2391,6 @@ class MainContainer extends React.Component {
                           // onPress={() => {
                           //   this.callRes_container(items);
                           // }}
-
                           onPress={() => {
                             this.changeflagcategorymenu(items);
                           }}
